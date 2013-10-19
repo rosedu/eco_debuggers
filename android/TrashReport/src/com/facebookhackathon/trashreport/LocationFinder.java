@@ -1,5 +1,6 @@
 package com.facebookhackathon.trashreport;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -13,19 +14,27 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+
 public class LocationFinder extends Service implements LocationListener{
 	
 	private LocationManager locationManager;
 	private Context context;
 	private boolean gpsEnabled;
 	private Location lastKnownLocation;
-	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 metrii
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 1; // 1 minut
+	private final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 metrii
+    private final long MIN_TIME_BW_UPDATES = 1000 * 1; // 1 minut
+    private Thread syncPosition; 
+    private GoogleMap map;
 	
-	public LocationFinder(Context context){
+	public LocationFinder(Context context, GoogleMap map){
 		this.context = context;
+		this.map = map;
 		locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
 		this.getLocation();
+		setSyncThread();
 	}
 	
 	private void showSettingsAlert(){
@@ -97,6 +106,32 @@ public class LocationFinder extends Service implements LocationListener{
 		return null;
 	}
 	
+	private void setSyncThread(){
+		syncPosition = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (getLocation() == null){
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				((Activity) context).runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						LatLng myPosition = new LatLng(lastKnownLocation.getLatitude(),	lastKnownLocation.getLongitude());
+						map.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition, 15));
+					}
+				});
+			}
+		});
+	}
 	
+	public Thread getSyncPosition() {
+		return syncPosition;
+	}
 	
 }

@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,8 +27,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 public class MapActivity extends Activity {
 	private GoogleMap map;
@@ -50,6 +54,8 @@ public class MapActivity extends Activity {
 	private int screenWidth;
 	private int screenHeight;
 	private LocationFinder locationFinder;
+	private final LatLng ROMANIA = new LatLng(46, 25);
+	private CameraView cameraView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,15 +64,36 @@ public class MapActivity extends Activity {
 		setContentView(R.layout.activity_map);
 		
 		context = this;
-		locationFinder = new LocationFinder(context);
-		
 		setScreenDimensions();
 		
 		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
 		        .getMap();
 		map.getUiSettings().setZoomControlsEnabled(false);
 		map.getUiSettings().setMyLocationButtonEnabled(true);
+		map.setMyLocationEnabled(true);
 		
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(ROMANIA, 5));
+		
+		locationFinder = new LocationFinder(context, map);
+		locationFinder.getSyncPosition().start();
+
+		//cameraView
+		cameraView = new CameraView(context, map);
+		cameraView.getCamera().start();
+		
+		map.setOnCameraChangeListener(new OnCameraChangeListener() {
+			
+			@Override
+			public void onCameraChange(CameraPosition position) {
+				LatLngBounds curScreen = map.getProjection().getVisibleRegion().latLngBounds;
+				cameraView.setLat_ne(curScreen.northeast.latitude);
+				cameraView.setLat_sw(curScreen.southwest.latitude);
+				cameraView.setLong_ne(curScreen.northeast.longitude);
+				cameraView.setLong_sw(curScreen.southwest.longitude);
+				cameraView.setDataWasChanged(true);
+			}
+		});
+
 		//img = (ImageView) findViewById(R.id.image_test);
 		reportButton = (Button) findViewById(R.id.button_report);
 		reportButton.setOnClickListener(new OnClickListener() {
@@ -155,6 +182,17 @@ public class MapActivity extends Activity {
 			*/			
 			}
 		});
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		cameraView.setRunning(false);
+		try {
+			cameraView.getCamera().join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -375,7 +413,6 @@ public class MapActivity extends Activity {
 				});
 		}
 	}
-	
 	
 	
 /*	//Check if an intent is available
