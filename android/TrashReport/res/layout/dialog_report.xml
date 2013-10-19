@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:weightSum="10" >
+
+    <com.facebookhackathon.trashreport.ResizableImageView
+        android:id="@+id/imageview_dialog_report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/all4"
+    />
+    
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:id="@+id/relative_layout_report_buttons"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" 
+        android:orientation="horizontal" >
+
+    	<Button
+    	    style="?android:attr/buttonBarButtonStyle"
+    	    android:id="@+id/button_report_browse_picture"
+    	    android:layout_height="wrap_content"
+    	    android:layout_width="0dp"
+    	    android:layout_weight="1"
+    	   	android:text="Browse a picture"
+    	   	android:background="#DDE0EE"
+    	   	android:textSize="15sp" />
+    	
+    	<Button
+    	    style="?android:attr/buttonBarButtonStyle"
+    	    android:id="@+id/button_report_take_picture"
+    	    android:layout_height="wrap_content"
+    	    android:layout_width="0dp"
+    	    android:layout_weight="1"
+    	    android:background="#DDE0EE"
+    	   	android:text="Take a picture"
+    	   	android:textSize="15sp" />
+    	
+    </LinearLayout>
+    
+    <RelativeLayout
+        android:id="@+id/relative_layout_report_magnitude"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:padding="16dp" >
+    	    	
+    	<TextView
+        	android:id="@+id/text_view_report_magnitude_label"
+	        android:layout_height="wrap_content"
+    	    android:layout_width="wrap_content"
+        	android:text="Magnitude:"
+        	android:textSize="15sp"
+        	android:layout_alignParentTop="true"
+        	android:layout_alignParentLeft="true" />
+    
+    	<TextView
+        	android:id="@+id/text_view_report_magnitude_status"
+        	android:layout_height="wrap_content"
+        	android:layout_width="wrap_content"
+        	android:text="Dirty"
+        	android:textSize="15sp"
+        	android:paddingLeft="18dp"
+        	android:layout_alignParentTop="true"
+        	android:layout_toRightOf="@id/text_view_report_magnitude_label" />
+    
+    	<SeekBar 
+        	android:id="@+id/seek_bar_report"
+        	android:layout_height="wrap_content"
+        	android:layout_width="fill_parent"
+        	android:layout_below="@id/text_view_report_magnitude_label"
+        	android:layout_marginTop="10dp"
+        	android:max="2"
+        	android:progress="0" />
+    
+    </RelativeLayout>
+    
+    <Button
+        android:id="@+id/button_report_submit"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:background="#A0CCFF"
+        android:text="Submit"
+        android:textSize="15sp" />
+    
+</LinearLayout>

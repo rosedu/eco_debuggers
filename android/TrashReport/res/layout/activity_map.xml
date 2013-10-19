@@ -1,0 +1,31 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MapActivity" >
+	
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.MapFragment" />
+    
+    <Button
+        android:id="@+id/button_report"
+        android:layout_height="32dp"
+        android:layout_width="96dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+ 		android:background="@drawable/button_report_shape"
+ 		android:text="Report"
+ 		android:textColor="#303030"
+   	/> 
+   	
+    <ImageView
+        android:id="@+id/image_test"
+        android:layout_height="200dp"
+        android:layout_width="200dp"
+    />
+   	
+
+</RelativeLayout>
