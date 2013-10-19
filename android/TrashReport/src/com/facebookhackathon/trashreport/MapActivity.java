@@ -49,6 +49,7 @@ public class MapActivity extends Activity {
 	private ReportAllertDialog reportAllertDialog;
 	private int screenWidth;
 	private int screenHeight;
+	private LocationFinder locationFinder;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,7 @@ public class MapActivity extends Activity {
 		setContentView(R.layout.activity_map);
 		
 		context = this;
+		locationFinder = new LocationFinder(context);
 		
 		setScreenDimensions();
 		
@@ -71,8 +73,15 @@ public class MapActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				 reportAllertDialog = new ReportAllertDialog(context, false);
-				 AlertDialog alertDialog = reportAllertDialog.createDialog();
+				if ( locationFinder.getLocation() != null) {
+					MyLocation.myLat = locationFinder.getLastKnownLocation().getLatitude();
+					MyLocation.myLong = locationFinder.getLastKnownLocation().getLongitude();
+					reportAllertDialog = new ReportAllertDialog(context, false);
+					AlertDialog alertDialog = reportAllertDialog.createDialog();
+				}
+				else {
+					Toast.makeText(context, "Your location is not set. Please wait", Toast.LENGTH_LONG).show();
+				}
 				 //alertDialog.show();
 				/*AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				//builder.setTitle("Report area");

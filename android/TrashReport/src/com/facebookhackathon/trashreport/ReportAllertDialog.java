@@ -109,7 +109,8 @@ public class ReportAllertDialog {
 					@Override
 					public void run() {
 						SendImageHttpPost sender = new SendImageHttpPost();
-						sender.sendPost(ApiRequestConstants.REPORT_URL, bitmap, (seekBarProgress + 1) + "");
+						sender.sendPost(ApiRequestConstants.REPORT_URL, bitmap, (seekBarProgress + 1) + "",
+										MyLocation.myLat + "", MyLocation.myLong + "");
 					}
 				});
 				t.start();

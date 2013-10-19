@@ -23,13 +23,13 @@ import android.util.Log;
 @SuppressWarnings("deprecation")
 public class SendImageHttpPost {
 	
-	public void sendPost(String url, Bitmap bitmap, String magnitude){
+	public void sendPost(String url, Bitmap bitmap, String magnitude, String lat, String lng){
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpPost postRequest = new HttpPost(url);
 		MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 		try {
-			reqEntity.addPart("lat", new StringBody("45"));
-			reqEntity.addPart("long", new StringBody("45"));
+			reqEntity.addPart("lat", new StringBody(lat));
+			reqEntity.addPart("long", new StringBody(lng));
 			reqEntity.addPart("magn", new StringBody(magnitude));
 		} catch (UnsupportedEncodingException e2) {
 			e2.printStackTrace();
