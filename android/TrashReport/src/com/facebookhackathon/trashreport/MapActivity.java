@@ -8,16 +8,17 @@ import java.io.InputStream;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.Layout;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -25,7 +26,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -39,13 +39,16 @@ public class MapActivity extends Activity {
 	private ImageView img;
 	
 	private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+	private final static int BROWSE_IMAGE_ACTIVITY_REQUEST_CODE = 1;
 	private Uri fileUri;
 	private final String JPEG_FILE_PREFIX = "TrashReport";
 	private final String JPEG_FILE_SUFFIX = ".jpg";
 	private String mCurrentPhotoPath;
 	private final static int MEDIA_TYPE_IMAGE = 1;
-	private final static int REQUEST_CODE = 1;
 	private Bitmap bitmap;
+	private ReportAllertDialog reportAllertDialog;
+	private int screenWidth;
+	private int screenHeight;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,22 +58,27 @@ public class MapActivity extends Activity {
 		
 		context = this;
 		
+		setScreenDimensions();
+		
 		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
 		        .getMap();
 		map.getUiSettings().setZoomControlsEnabled(false);
 		map.getUiSettings().setMyLocationButtonEnabled(true);
 		
-		img = (ImageView) findViewById(R.id.image_test);
+		//img = (ImageView) findViewById(R.id.image_test);
 		reportButton = (Button) findViewById(R.id.button_report);
 		reportButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				 reportAllertDialog = new ReportAllertDialog(context, false);
+				 AlertDialog alertDialog = reportAllertDialog.createDialog();
+				 //alertDialog.show();
+				/*AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				//builder.setTitle("Report area");
 				//builder.setMessage("You want to report a messy area. In order to do this you have " +
 				//		"to upload a photo.\nPlease select one of the obtion below:");
-				/*builder.setPositiveButton("Take a picture", new DialogInterface.OnClickListener() {
+				builder.setPositiveButton("Take a picture", new DialogInterface.OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -83,8 +91,8 @@ public class MapActivity extends Activity {
 					    // start the image capture Intent
 					    startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
 					}
-				});*/
-				/*builder.setNegativeButton("Browse a picture", new DialogInterface.OnClickListener() {
+				});
+				builder.setNegativeButton("Browse a picture", new DialogInterface.OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -94,7 +102,7 @@ public class MapActivity extends Activity {
 						intent.addCategory(Intent.CATEGORY_OPENABLE);
 						startActivityForResult(intent, REQUEST_CODE);
 					}
-				});*/
+				});
 				
 				
 				LayoutInflater inflater = getLayoutInflater();
@@ -108,7 +116,34 @@ public class MapActivity extends Activity {
 				alertDialog = builder.create();
 				alertDialog.show();
 				
+				//button for browsing local photos
+				Button buttonBrowsePicture = (Button) alertDialog.findViewById(R.id.button_report_browse_picture);
+				buttonBrowsePicture.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						Intent intent = new Intent();
+						intent.setType("image/*");
+						intent.setAction(Intent.ACTION_GET_CONTENT);
+						intent.addCategory(Intent.CATEGORY_OPENABLE);
+						//startActivityForResult(intent, REQUEST_CODE);
+					}
+				});
 				
+				//button for taking pictures
+				Button buttonTakePicture = (Button) alertDialog.findViewById(R.id.button_report_take_picture);
+				buttonTakePicture.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// create Intent to take a picture and return control to the calling application
+					    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					    
+					    // start the image capture Intent
+					    startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+					}
+				});
+			*/			
 			}
 		});
 	}
@@ -135,7 +170,12 @@ public class MapActivity extends Activity {
 			if (resultCode == RESULT_OK) {
 				if (data != null){
 				// Image captured and saved to fileUri specified in the Intent
-					img.setImageBitmap( (Bitmap) data.getExtras().get("data"));
+					//img.setImageBitmap( (Bitmap) data.getExtras().get("data"));
+					bitmap = (Bitmap) data.getExtras().get("data");
+					reportAllertDialog.setBitmap(bitmap);
+					reportAllertDialog.setWithPicture(true);
+					AlertDialog alertDialog = reportAllertDialog.createDialog();
+					//alertDialog.show();
 					Toast.makeText(context, "Image saved to:\n" +
 						data.getData(), Toast.LENGTH_LONG).show();
 				}
@@ -150,7 +190,7 @@ public class MapActivity extends Activity {
 				Toast.makeText(context, "Failed! Please try again", Toast.LENGTH_LONG).show();
 			}
 		}
-		else if (requestCode == REQUEST_CODE){
+		else if (requestCode == BROWSE_IMAGE_ACTIVITY_REQUEST_CODE){
 			if (resultCode == RESULT_OK){
 				if ( data != null){
 					try {
@@ -161,8 +201,26 @@ public class MapActivity extends Activity {
 								data.getData());
 						bitmap = BitmapFactory.decodeStream(stream);
 						stream.close();
-						bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
-						img.setImageBitmap(bitmap);
+						//I will be back to hardcode 7
+						bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 7, 
+								bitmap.getHeight() / 7, true);
+						reportAllertDialog.setBitmap(bitmap);
+						reportAllertDialog.setWithPicture(true);
+						AlertDialog alertDialog = reportAllertDialog.createDialog();
+						//Don't know. Does not look good. Try later!
+						/*ImageView iv = (ImageView) alertDialog.findViewById(R.id.imageview_dialog_report);
+						int h = bitmap.getHeight();
+						int w = bitmap.getWidth();
+						int H = dpToPx(200);
+						int W = screenWidth - 20;
+						if ( h * W > H * w ){
+							bitmap = Bitmap.createScaledBitmap(bitmap, (int) Math.ceil((float)w * (float)H / (float)h), H, true);
+						}
+						else {
+							Log.d("TrashReport", "" + h + " " + w + " " + H + " " + W + " " + (int) Math.ceil((float)h * (float)W / (float)w));
+							bitmap = Bitmap.createScaledBitmap(bitmap, W, (int) Math.ceil((float)h * (float)W / (float)w), true);
+						}
+						iv.setImageBitmap(bitmap);*/
 					} catch (FileNotFoundException e) {
 		                e.printStackTrace();
 		            } catch (IOException e) {
@@ -177,6 +235,19 @@ public class MapActivity extends Activity {
 			Toast.makeText(context, "Image browsing canceled", Toast.LENGTH_LONG).show();
 			}
 		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	private void setScreenDimensions(){
+		Display display = getWindowManager().getDefaultDisplay();
+		screenWidth = display.getWidth();
+		screenHeight = display.getHeight();
+	}
+	
+	private int dpToPx(int dp) {
+	    DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+	    int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));       
+	    return px;
 	}
 	
 	/** Create a file Uri for saving an image or video */
@@ -215,6 +286,88 @@ public class MapActivity extends Activity {
 
 	    return mediaFile;
 	}
+	
+	//action will be define like this
+	// 0 - report & no picture
+	// 1 - get back from browsing/taking with picture
+	private void createDialog(Context context, int action){
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		LayoutInflater inflater = getLayoutInflater();
+		View view = inflater.inflate(R.layout.dialog_report,null);
+		AlertDialog alertDialog;
+		
+		if ( action == 0){
+			ImageView iv = (ImageView) view.findViewById(R.id.imageview_dialog_report);
+			iv.setVisibility(View.GONE);
+			builder.setView(view);
+
+			alertDialog = builder.create();
+			alertDialog.show();
+
+			//button for browsing local photos
+			Button buttonBrowsePicture = (Button) alertDialog.findViewById(R.id.button_report_browse_picture);
+			buttonBrowsePicture.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					Intent intent = new Intent();
+					intent.setType("image/*");
+					intent.setAction(Intent.ACTION_GET_CONTENT);
+					intent.addCategory(Intent.CATEGORY_OPENABLE);
+					startActivityForResult(intent, BROWSE_IMAGE_ACTIVITY_REQUEST_CODE);
+				}
+			});
+
+			//button for taking pictures
+			Button buttonTakePicture = (Button) alertDialog.findViewById(R.id.button_report_take_picture);
+			buttonTakePicture.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					// create Intent to take a picture and return control to the calling application
+					Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+					// start the image capture Intent
+					startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+				}
+			});
+		}
+		else if ( action == 1){		
+				builder.setView(view);
+				alertDialog = builder.create();
+				alertDialog.show();
+
+				//button for browsing local photos
+				Button buttonBrowsePicture = (Button) alertDialog.findViewById(R.id.button_report_browse_picture);
+				buttonBrowsePicture.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Intent intent = new Intent();
+						intent.setType("image/*");
+						intent.setAction(Intent.ACTION_GET_CONTENT);
+						intent.addCategory(Intent.CATEGORY_OPENABLE);
+						startActivityForResult(intent, BROWSE_IMAGE_ACTIVITY_REQUEST_CODE);
+					}
+				});
+
+				//button for taking pictures
+				Button buttonTakePicture = (Button) alertDialog.findViewById(R.id.button_report_take_picture);
+				buttonTakePicture.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						// create Intent to take a picture and return control to the calling application
+						Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+						// start the image capture Intent
+						startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+					}
+				});
+		}
+	}
+	
+	
 	
 /*	//Check if an intent is available
 	private boolean isIntentAvailable(Context context, String action) {

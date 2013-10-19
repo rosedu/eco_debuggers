@@ -5,10 +5,12 @@
     android:orientation="vertical"
     android:weightSum="10" >
 
-    <com.facebookhackathon.trashreport.ResizableImageView
+    <!-- <com.facebookhackathon.trashreport.ResizableImageView -->
+    <ImageView
         android:id="@+id/imageview_dialog_report"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
+        android:scaleType="center"
         android:src="@drawable/all4"
     />
     

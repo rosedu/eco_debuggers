@@ -20,6 +20,7 @@ public class ResizableImageView extends ImageView {
                  // ceil not round - avoid thin vertical gaps along the left/right edges
                  int width = MeasureSpec.getSize(widthMeasureSpec);
                  int height = (int) Math.ceil((float) width * (float) d.getIntrinsicHeight() / (float) d.getIntrinsicWidth());
+                 getLayoutParams().height = height > 200 ? 200 : height;
                  setMeasuredDimension(width, height);
          }else{
                  super.onMeasure(widthMeasureSpec, heightMeasureSpec);
