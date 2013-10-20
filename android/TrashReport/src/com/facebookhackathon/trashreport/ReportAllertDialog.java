@@ -12,20 +12,24 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 public class ReportAllertDialog {
-	private AlertDialog alertDialog;
-	private AlertDialog.Builder builder;
-	private boolean withPicture;
-	private Context context;
-	private Button buttonTakePicture;
-	private Button buttonBrowsePicture;
-	private final int BROWSE_IMAGE_ACTIVITY_REQUEST_CODE = 1;
-	private final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-	private Bitmap bitmap;
-	private int seekBarProgress;
+	protected AlertDialog alertDialog;
+	protected AlertDialog.Builder builder;
+	protected boolean withPicture;
+	protected Context context;
+	protected Button buttonTakePicture;
+	protected Button buttonBrowsePicture;
+	protected final int BROWSE_IMAGE_ACTIVITY_REQUEST_CODE = 1;
+	protected final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+	protected Bitmap bitmap;
+	protected int seekBarProgress;
+	
+	public ReportAllertDialog() {
+	}
 	
 	public ReportAllertDialog(Context context, boolean withPicture){
 		this.withPicture = withPicture;
@@ -65,7 +69,7 @@ public class ReportAllertDialog {
 		}
 	}
 	
-	private void setSeekBar(){
+	protected void setSeekBar(){
 		SeekBar seekBar = (SeekBar) alertDialog.findViewById(R.id.seek_bar_report);
 		final TextView messMagnitude = (TextView) alertDialog.findViewById(R.id.text_view_report_magnitude_status);
 		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -97,7 +101,7 @@ public class ReportAllertDialog {
 		});
 	}
 	
-	private void setSubmitButton(){
+	protected void setSubmitButton(){
 		Button buttonSubmit = (Button) alertDialog.findViewById(R.id.button_report_submit);
 		buttonSubmit.setEnabled(true);
 		buttonSubmit.setOnClickListener(new OnClickListener() {
@@ -114,12 +118,13 @@ public class ReportAllertDialog {
 					}
 				});
 				t.start();
+				Toast.makeText(context, "Report sent successful", Toast.LENGTH_SHORT).show();
 				alertDialog.dismiss();
 			}
 		});
 	}
 	
-	private void setPictureButtons(){
+	protected void setPictureButtons(){
 		buttonBrowsePicture = (Button) alertDialog.findViewById(R.id.button_report_browse_picture);
 		buttonBrowsePicture.setOnClickListener(new OnClickListener() {
 

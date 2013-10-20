@@ -6,4 +6,5 @@ public class ApiRequestConstants {
 	public static final String REPORT_URL = BASE_URL + "report";
 	public static final String TRASH_URL = BASE_URL + "trash";
 	public static final String IMAGE_URL = BASE_URL + "image";
+	public static final String UPDATE_URL = BASE_URL + "update";
 }

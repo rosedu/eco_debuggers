@@ -53,11 +53,13 @@ public class MapActivity extends Activity {
 	private final static int MEDIA_TYPE_IMAGE = 1;
 	private Bitmap bitmap;
 	private ReportAllertDialog reportAllertDialog;
+	private UpdateAlertDialog updateAlertDialog;
 	private int screenWidth;
 	private int screenHeight;
 	private LocationFinder locationFinder;
 	private final LatLng ROMANIA = new LatLng(46, 25);
 	private CameraView cameraView;
+	private String request;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +110,10 @@ public class MapActivity extends Activity {
 						DownloadImage downloadImg = new DownloadImage(context, Markers.markerArray.get(i).getImageId());
 						downloadImg.getDownloader().start();
 						while ( downloadImg.getBitmap() == null){}
-						img.setImageBitmap(downloadImg.getBitmap());
+						updateAlertDialog = new UpdateAlertDialog(context, true, Markers.markerArray.get(i).getImageId());
+						updateAlertDialog.setBitmap(downloadImg.getBitmap());
+						AlertDialog alertDialog = updateAlertDialog.createDialog();
+						request = "update";
 					}
 				}
 				return false;
@@ -126,6 +131,7 @@ public class MapActivity extends Activity {
 					MyLocation.myLong = locationFinder.getLastKnownLocation().getLongitude();
 					reportAllertDialog = new ReportAllertDialog(context, false);
 					AlertDialog alertDialog = reportAllertDialog.createDialog();
+					request = "report";
 				}
 				else {
 					Toast.makeText(context, "Your location is not set. Please wait", Toast.LENGTH_LONG).show();
@@ -239,13 +245,18 @@ public class MapActivity extends Activity {
 				if (data != null){
 				// Image captured and saved to fileUri specified in the Intent
 					//img.setImageBitmap( (Bitmap) data.getExtras().get("data"));
-					bitmap = (Bitmap) data.getExtras().get("data");
-					reportAllertDialog.setBitmap(bitmap);
-					reportAllertDialog.setWithPicture(true);
-					AlertDialog alertDialog = reportAllertDialog.createDialog();
-					//alertDialog.show();
-					Toast.makeText(context, "Image saved to:\n" +
-						data.getData(), Toast.LENGTH_LONG).show();
+					if ( request.contentEquals("report")){
+						bitmap = (Bitmap) data.getExtras().get("data");
+						reportAllertDialog.setBitmap(bitmap);
+						reportAllertDialog.setWithPicture(true);
+						AlertDialog alertDialog = reportAllertDialog.createDialog();
+					}
+					else {
+						bitmap = (Bitmap) data.getExtras().get("data");
+						updateAlertDialog.setBitmap(bitmap);
+						updateAlertDialog.setTheImageIsChanged(true);
+						AlertDialog alertDialog = updateAlertDialog.createDialog();
+					}
 				}
 				else {
 					Log.d("TrashReport","Error");
@@ -272,9 +283,16 @@ public class MapActivity extends Activity {
 						//I will be back to hardcode 7
 						bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 7, 
 								bitmap.getHeight() / 7, true);
-						reportAllertDialog.setBitmap(bitmap);
-						reportAllertDialog.setWithPicture(true);
-						AlertDialog alertDialog = reportAllertDialog.createDialog();
+						if ( request.contentEquals("report")){
+							reportAllertDialog.setBitmap(bitmap);
+							reportAllertDialog.setWithPicture(true);
+							AlertDialog alertDialog = reportAllertDialog.createDialog();
+						}
+						else {
+							bitmap = (Bitmap) data.getExtras().get("data");
+							updateAlertDialog.setBitmap(bitmap);
+							updateAlertDialog.setTheImageIsChanged(true);
+						}
 						//Don't know. Does not look good. Try later!
 						/*ImageView iv = (ImageView) alertDialog.findViewById(R.id.imageview_dialog_report);
 						int h = bitmap.getHeight();
