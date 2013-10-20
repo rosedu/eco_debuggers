@@ -1,8 +1,7 @@
-from flask import Flask, request, Response, json, send_file
+from flask import Flask, request, Response, json, send_file, render_template
 from flask.ext.pymongo import PyMongo
 from bson.binary import Binary
 from bson.objectid import ObjectId
-
 from io import BytesIO
 
 app = Flask(__name__)
@@ -11,7 +10,7 @@ mongo = PyMongo(app)
 
 @app.route('/')
 def index():
-    return 'INDEX, BOSS'
+    return render_template('index.html')
 
 
 @app.route('/api/v1/report', methods=['POST'])
@@ -34,8 +33,8 @@ def report():
 @app.route('/api/v1/trash', methods=['GET'])
 def trash():
     try:
-        point_ne = [float(request.args['long_sw']), float(request.args['lat_sw'])]
-        point_sw = [float(request.args['long_ne']), float(request.args['lat_ne'])]
+        point_sw = [float(request.args['long_sw']), float(request.args['lat_sw'])]
+        point_ne = [float(request.args['long_ne']), float(request.args['lat_ne'])]
         query = {'coords': {'$within': {'$box': [point_sw, point_ne]}}}
         cursor = mongo.db.reports.find(query, {'img': 0})
         reports = list(cursor)
