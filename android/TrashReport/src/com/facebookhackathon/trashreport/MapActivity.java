@@ -30,10 +30,12 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 
 public class MapActivity extends Activity {
 	private GoogleMap map;
@@ -63,6 +65,8 @@ public class MapActivity extends Activity {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_map);
 		
+		img = (ImageView) findViewById(R.id.image_test);
+		
 		context = this;
 		setScreenDimensions();
 		
@@ -91,6 +95,23 @@ public class MapActivity extends Activity {
 				cameraView.setLong_ne(curScreen.northeast.longitude);
 				cameraView.setLong_sw(curScreen.southwest.longitude);
 				cameraView.setDataWasChanged(true);
+			}
+		});
+		
+		map.setOnMarkerClickListener(new OnMarkerClickListener() {
+			
+			@Override
+			public boolean onMarkerClick(Marker marker) {
+				Log.d("TrashReport", "Go for Dragos");
+				for (int i=0; i<Markers.markerArray.size(); i++){
+					if ( marker.hashCode() == Markers.markerArray.get(i).getMarker().hashCode()){
+						DownloadImage downloadImg = new DownloadImage(context, Markers.markerArray.get(i).getImageId());
+						downloadImg.getDownloader().start();
+						while ( downloadImg.getBitmap() == null){}
+						img.setImageBitmap(downloadImg.getBitmap());
+					}
+				}
+				return false;
 			}
 		});
 

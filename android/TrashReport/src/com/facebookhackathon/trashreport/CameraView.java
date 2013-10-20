@@ -16,12 +16,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class CameraView {
 	private static double lat_ne;
@@ -39,8 +43,12 @@ public class CameraView {
 		this.map = map;
 		isRunning = true;
 		dataWasChanged = true;
+		setCamera();
+	}
+	
+	private void setCamera(){
 		camera = new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				while (isRunning){
@@ -48,17 +56,17 @@ public class CameraView {
 						dataWasChanged = false;
 						HttpResponse resp = null;
 						DefaultHttpClient mHttpClient = new DefaultHttpClient();
-						
+
 						List<NameValuePair> data = new ArrayList<NameValuePair>(4);
 						data.add(new BasicNameValuePair("long_ne", long_ne + ""));
 						data.add(new BasicNameValuePair("lat_ne", lat_ne + ""));
 						data.add(new BasicNameValuePair("long_sw", long_sw + ""));
 						data.add(new BasicNameValuePair("lat_sw", lat_sw + ""));
-						
+
 						String paramString = URLEncodedUtils.format(data, "utf-8");
 						Log.d("TrashReport", ApiRequestConstants.TRASH_URL + "?" + paramString);
 						HttpGet httpGet = new HttpGet(ApiRequestConstants.TRASH_URL + "?"+ paramString);
-						
+
 						try {
 							resp = mHttpClient.execute(httpGet);
 						} catch (ClientProtocolException e) {
@@ -66,7 +74,7 @@ public class CameraView {
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						
+
 						BufferedReader reader = null;
 						try {
 							reader = new BufferedReader(new InputStreamReader(resp.getEntity().getContent(), "UTF-8"));
@@ -80,21 +88,49 @@ public class CameraView {
 						StringBuilder builder = new StringBuilder();
 						try {
 							for (String line = null; (line = reader.readLine()) != null;) {
-							    builder.append(line).append("\n");
+								builder.append(line).append("\n");
 							}
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						
+
 						JSONTokener tokener = new JSONTokener(builder.toString());
+						JSONArray finalResult = null;
 						try {
-							JSONArray finalResult = new JSONArray(tokener);
+							finalResult = new JSONArray(tokener);
 							Log.d("TrashReport", finalResult.toString());
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
+
+						if (finalResult != null){
+							for (int i=0; i<finalResult.length(); i++){
+								try {
+									Log.d("TrashReport", "Here");
+									JSONObject jObj = finalResult.getJSONObject(i);
+									final String id = jObj.getString("_id");
+									if (!Markers.markersHashTable.contains(id)){
+										Markers.markersHashTable.add(id);
+										final LatLng ll = new LatLng(jObj.getDouble("lat"), jObj.getDouble("long"));
+										final int magnitude = jObj.getInt("magn");
+										((Activity) context).runOnUiThread( new Runnable() {
+
+											@Override
+											public void run() {
+												Markers.markerArray.add( 
+														new MarkersAttributes(
+																map.addMarker(new MarkerOptions().position(ll)),
+																ll, magnitude, id));
+											}
+										});
+									}
+								} catch (JSONException e) {
+									e.printStackTrace();
+								}
+							}
+						}
 					}
-					
+
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
