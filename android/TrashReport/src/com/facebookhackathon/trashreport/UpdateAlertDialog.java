@@ -74,13 +74,27 @@ public class UpdateAlertDialog extends ReportAllertDialog {
 	protected void setSeekBar() {
 		SeekBar seekBar = (SeekBar) alertDialog.findViewById(R.id.seek_bar_report);
 		seekBar.setMax(3);
+		final TextView messMagnitude = (TextView) alertDialog.findViewById(R.id.text_view_report_magnitude_status);
 		for (int i=0; i<Markers.markerArray.size();i++){
 			if (Markers.markerArray.get(i).getImageId().contentEquals(imageId)){
+				int magn = Markers.markerArray.get(i).getMagnitude();
+				if ( magn == 0){
+					messMagnitude.setText("Clean");
+				}
+				else if ( magn == 1){
+					messMagnitude.setText("Dirty");
+				}
+				else if ( magn == 2){
+					messMagnitude.setText("Dirtier");
+				}
+				else {
+					messMagnitude.setText("Dirtiest");
+				}
 				seekBar.setProgress(Markers.markerArray.get(i).getMagnitude());
 				break;
 			}
 		}
-		final TextView messMagnitude = (TextView) alertDialog.findViewById(R.id.text_view_report_magnitude_status);
+		
 		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			
 			@Override
@@ -173,8 +187,8 @@ public class UpdateAlertDialog extends ReportAllertDialog {
 						}
 					});
 					t.start();
-					Toast.makeText(context, "Update sent successful", Toast.LENGTH_SHORT).show();
 					alertDialog.dismiss();
+					Toast.makeText(context, "Update sent successful", Toast.LENGTH_LONG).show();
 				}
 			}
 		});

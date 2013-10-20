@@ -118,8 +118,8 @@ public class ReportAllertDialog {
 					}
 				});
 				t.start();
-				Toast.makeText(context, "Report sent successful", Toast.LENGTH_SHORT).show();
 				alertDialog.dismiss();
+				Toast.makeText(context, "Report sent successful", Toast.LENGTH_LONG).show();
 			}
 		});
 	}
