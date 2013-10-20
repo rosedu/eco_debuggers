@@ -15,8 +15,9 @@
     <script type="text/javascript">
         google.maps.visualRefresh = true;
         var map,
+            infowindow,
             reports = {},
-            markers = [], showing_markers = false;
+            markers = [], showing_markers = false,
             magnitudes = ['Clean', 'Dirty', 'Dirtier', 'Dirtiest'];
 
         function initialize() {
@@ -64,6 +65,7 @@
 
                             marker = new google.maps.Marker({
                                 position: position,
+                                flat: true,
                                 icon: {
                                     path: google.maps.SymbolPath.CIRCLE,
                                     fillColor: 'red',
@@ -75,6 +77,15 @@
                                 animation: google.maps.Animation.DROP,
                                 title: position.lat() + ', ' +  position.lng() + ' - ' + magnitudes[magn]
                             });
+                            (function(marker, _id, magn) {
+                                google.maps.event.addListener(marker, 'click', function() {
+                                    infowindow && infowindow.close();
+                                    infowindow = new google.maps.InfoWindow({
+                                        content: '<img src="api/v1/image?_id=' + _id + '" />',
+                                    });
+                                    infowindow.open(map, marker);
+                                });
+                            })(marker, _id, magn);
                             markers.push(marker);
 
                             heatmap.setData($.map(reports, function(k, v) {return k;}));
