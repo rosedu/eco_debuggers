@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <title>TrashReport</title>
+    <style type="text/css">
+        html { height: 100% }
+        body { height: 100%; margin: 0; padding: 0 }
+        #map-canvas { height: 100%; width: 100% }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyACLQvW20X57CWaYxyIg6D5L8HQlfa8Sd8&sensor=true">
+    </script>
+    <script type="text/javascript">
+        google.maps.visualRefresh = true;
+        var map,
+            infowindow,
+            reports = {},
+            showing_markers = false,
+            magnitudes = ['Clean', 'Dirty', 'Dirtier', 'Dirtiest'];
+
+        function CIRCLE_ICON(magn) {
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: (magn ? 'red' : 'green'),
+                fillOpacity: 0.36 + 0.06 * magn,
+                strokeWeight: 0,
+                scale: 2 + 2 * magn
+            };
+        }
+
+        function V_ICON(magn) {
+            return {
+                path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
+                fillColor: (magn ? 'red' : 'green'),
+                fillOpacity: 0.36 + 0.06 * magn,
+                strokeWeight: 0,
+                scale: 70 + 10 * magn
+            };
+        }
+
+        function showMarkers() {
+            showing_markers = true;
+            $.map(reports, function(v, k) {
+                v['marker'].setMap(map);
+            });
+        }
+
+        function hideMarkers() {
+            showing_markers = false;
+            $.map(reports, function(v, k) {
+                v['marker'].setMap(null);
+            });
+        }
+
+        function shouldBeVisible() {
+            return map.getZoom() >= 13;
+        }
+
+        function initialize() {
+            var mapOptions = {
+                center: new google.maps.LatLng(44.426, 26.105),
+                zoom: 11,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+            var streetView = map.getStreetView();
+            google.maps.event.addListener(streetView, 'visible_changed', function() {
+                if (this.getVisible()) {
+                    $.map(reports, function(v, k) {
+                        v['marker'].setIcon(V_ICON(v['weight']));
+                    });
+                } else {
+                    $.map(reports, function(v, k) {
+                        v['marker'].setIcon(CIRCLE_ICON(v['weight']));
+                    });
+                }
+            });
+
+            var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: [],
+                /*
+                dissipating: false,
+                radius: 0.003,
+                */
+                radius: 50,
+                opacity: 0.3,
+                map: map
+            });
+
+            google.maps.event.addListener(map, 'bounds_changed', function() {
+                var bounds = this.getBounds(),
+                    sw = bounds.getSouthWest(),
+                    ne = bounds.getNorthEast();
+
+                $.get('api/v1/trash', {
+                    long_sw: sw.lng(),
+                    lat_sw: sw.lat(),
+                    long_ne: ne.lng(),
+                    lat_ne: ne.lat()
+                }, function(data) {
+                    data = JSON.parse(data);
+                    var report, position, _id, marker, magn;
+
+                    $.map(data, function(report) {
+                        _id = report['_id'];
+                        if (!reports[_id]) {
+                            position = new google.maps.LatLng(report['lat'], report['long']);
+                            magn = +report['magn'];
+
+                            marker = new google.maps.Marker({
+                                position: position,
+                                map: shouldBeVisible() ? map : null,
+                                flat: true,
+                                icon: (streetView.getVisible() ? V_ICON(magn) : CIRCLE_ICON(magn)),
+                                title: position.lat() + ', ' +  position.lng() + ' - ' + magnitudes[magn]
+                            });
+                            (function(marker, _id, magn) {
+                                google.maps.event.addListener(marker, 'click', function() {
+                                    infowindow && infowindow.close();
+                                    infowindow = new google.maps.InfoWindow({
+                                        content: '<img src="api/v1/image?_id=' + _id + '" />',
+                                    });
+                                    infowindow.open(map, marker);
+                                });
+                            })(marker, _id, magn);
+
+                            reports[_id] = {
+                                'location': position,
+                                'weight': magn,
+                                'marker': marker
+                            }
+
+                            heatmap.setData($.map(reports, function(v, k) {return v;}));
+                        }
+                    });
+                });
+            });
+
+            google.maps.event.addListener(map, 'zoom_changed', function() {
+                if (map.getZoom() >= 13 && !showing_markers) {
+                    showMarkers();
+                }
+                if (map.getZoom() < 13 && showing_markers) {
+                    hideMarkers();
+                }
+            });
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+</head>
+
+<body>
+    <div id="map-canvas"/>
+</body>
+</html>
