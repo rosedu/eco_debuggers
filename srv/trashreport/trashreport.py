@@ -4,6 +4,8 @@ from bson.binary import Binary
 from bson.objectid import ObjectId
 from io import BytesIO
 
+from dataset import random_box, random_magn
+
 app = Flask(__name__)
 mongo = PyMongo(app)
 
@@ -12,6 +14,29 @@ mongo = PyMongo(app)
 def index():
     return render_template('index.html')
 
+
+@app.route('/api/v1/generate', methods=['POST'])
+def generate():
+    #try:
+        long_sw = float(request.args['long_sw'])
+        lat_sw = float(request.args['lat_sw'])
+        long_ne = float(request.args['long_ne'])
+        lat_ne = float(request.args['lat_ne'])
+
+        mongo.db.reports.remove()
+        points = random_box(lat_sw, long_sw, lat_ne, long_ne)
+        reports = [{
+            'coords': p,
+            'magn': random_magn(),
+            'img': Binary(open('trash.jpg', 'rb').read())
+        } for p in points]
+
+        mongo.db.reports.insert(reports)
+
+        return "Done."
+
+    #except:
+        return "Fail."
 
 @app.route('/api/v1/report', methods=['POST'])
 def report():

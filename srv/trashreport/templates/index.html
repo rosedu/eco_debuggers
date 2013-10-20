@@ -17,8 +17,46 @@
         var map,
             infowindow,
             reports = {},
-            markers = [], showing_markers = false,
+            showing_markers = false,
             magnitudes = ['Clean', 'Dirty', 'Dirtier', 'Dirtiest'];
+
+        function CIRCLE_ICON(magn) {
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: (magn ? 'red' : 'green'),
+                fillOpacity: 0.36 + 0.06 * magn,
+                strokeWeight: 0,
+                scale: 2 + 2 * magn
+            };
+        }
+
+        function V_ICON(magn) {
+            return {
+                path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
+                fillColor: (magn ? 'red' : 'green'),
+                fillOpacity: 0.36 + 0.06 * magn,
+                strokeWeight: 0,
+                scale: 70 + 10 * magn
+            };
+        }
+
+        function showMarkers() {
+            showing_markers = true;
+            $.map(reports, function(v, k) {
+                v['marker'].setMap(map);
+            });
+        }
+
+        function hideMarkers() {
+            showing_markers = false;
+            $.map(reports, function(v, k) {
+                v['marker'].setMap(null);
+            });
+        }
+
+        function shouldBeVisible() {
+            return map.getZoom() >= 13;
+        }
 
         function initialize() {
             var mapOptions = {
@@ -27,6 +65,19 @@
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
             map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+            var streetView = map.getStreetView();
+            google.maps.event.addListener(streetView, 'visible_changed', function() {
+                if (this.getVisible()) {
+                    $.map(reports, function(v, k) {
+                        v['marker'].setIcon(V_ICON(v['weight']));
+                    });
+                } else {
+                    $.map(reports, function(v, k) {
+                        v['marker'].setIcon(CIRCLE_ICON(v['weight']));
+                    });
+                }
+            });
 
             var heatmap = new google.maps.visualization.HeatmapLayer({
                 data: [],
@@ -53,28 +104,17 @@
                     data = JSON.parse(data);
                     var report, position, _id, marker, magn;
 
-                    for (var i = 0, len = data.length; i < len; i++) {
-                        report = data[i]; _id = report['_id'];
+                    $.map(data, function(report) {
+                        _id = report['_id'];
                         if (!reports[_id]) {
                             position = new google.maps.LatLng(report['lat'], report['long']);
                             magn = +report['magn'];
-                            reports[_id] = {
-                                'location': position,
-                                'weight': magn
-                            }
 
                             marker = new google.maps.Marker({
                                 position: position,
+                                map: shouldBeVisible() ? map : null,
                                 flat: true,
-                                icon: {
-                                    path: google.maps.SymbolPath.CIRCLE,
-                                    fillColor: 'red',
-                                    fillOpacity: 0.36 + 0.06 * magn,
-                                    strokeColor: 'red',
-                                    strokeWeight: 0,
-                                    scale: 2 + 2 * magn
-                                },
-                                animation: google.maps.Animation.DROP,
+                                icon: (streetView.getVisible() ? V_ICON(magn) : CIRCLE_ICON(magn)),
                                 title: position.lat() + ', ' +  position.lng() + ' - ' + magnitudes[magn]
                             });
                             (function(marker, _id, magn) {
@@ -86,26 +126,25 @@
                                     infowindow.open(map, marker);
                                 });
                             })(marker, _id, magn);
-                            markers.push(marker);
 
-                            heatmap.setData($.map(reports, function(k, v) {return k;}));
+                            reports[_id] = {
+                                'location': position,
+                                'weight': magn,
+                                'marker': marker
+                            }
+
+                            heatmap.setData($.map(reports, function(v, k) {return v;}));
                         }
-                    }
+                    });
                 });
             });
 
             google.maps.event.addListener(map, 'zoom_changed', function() {
-                if (this.getZoom() >= 13 && !showing_markers) {
-                    showing_markers = true;
-                    for (var i = 0, len = markers.length; i < len; i++) {
-                        markers[i].setMap(map);
-                    }
+                if (map.getZoom() >= 13 && !showing_markers) {
+                    showMarkers();
                 }
-                if (this.getZoom() < 13 && showing_markers) {
-                    showing_markers = false;
-                    for (var i = 0, len = markers.length; i < len; i++) {
-                        markers[i].setMap(null);
-                    }
+                if (map.getZoom() < 13 && showing_markers) {
+                    hideMarkers();
                 }
             });
         }
