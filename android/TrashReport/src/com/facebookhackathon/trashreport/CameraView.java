@@ -21,9 +21,11 @@ import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -113,6 +115,17 @@ public class CameraView {
 										Markers.markersHashTable.add(id);
 										final LatLng ll = new LatLng(jObj.getDouble("lat"), jObj.getDouble("long"));
 										final int magnitude = jObj.getInt("magn");
+										final CircleOptions co = new CircleOptions()
+															.center(ll)
+															.radius(magnitude * 20);
+										if (magnitude == 3){
+											co.fillColor(Color.argb(0, 180, 20, 0));
+										} else if (magnitude == 2) {
+											co.fillColor(Color.argb(0, 130, 20, 0));
+										} else {
+											co.fillColor(Color.argb(0, 130, 20, 0));
+										}
+										
 										((Activity) context).runOnUiThread( new Runnable() {
 
 											@Override
@@ -120,7 +133,7 @@ public class CameraView {
 												Markers.markerArray.add( 
 														new MarkersAttributes(
 																map.addMarker(new MarkerOptions().position(ll)),
-																ll, magnitude, id));
+																ll, magnitude, id, map.addCircle(co)));
 											}
 										});
 									}

@@ -253,6 +253,7 @@ public class MapActivity extends Activity {
 					}
 					else {
 						bitmap = (Bitmap) data.getExtras().get("data");
+						bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
 						updateAlertDialog.setBitmap(bitmap);
 						updateAlertDialog.setTheImageIsChanged(true);
 						AlertDialog alertDialog = updateAlertDialog.createDialog();

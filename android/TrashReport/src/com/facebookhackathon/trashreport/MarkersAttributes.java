@@ -2,6 +2,7 @@ package com.facebookhackathon.trashreport;
 
 import android.graphics.Bitmap;
 
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
@@ -11,6 +12,7 @@ public class MarkersAttributes {
 	private int magnitude;
 	private String imageId;
 	private Bitmap bitmap;
+	private Circle circle;
 	
 	public MarkersAttributes(Marker marker){
 		this.marker = marker;
@@ -34,6 +36,14 @@ public class MarkersAttributes {
 		this.imageId = imageId;
 	}
 	
+	public MarkersAttributes(Marker marker, LatLng latLng, int magnitude, String imageId, Circle circle){
+		this.marker = marker;
+		this.latLng = latLng;
+		this.magnitude = magnitude;
+		this.imageId = imageId;
+		this.circle = circle;
+	}
+	
 	public void setBitmap(Bitmap bitmap) {
 		this.bitmap = bitmap;
 	}
@@ -54,6 +64,10 @@ public class MarkersAttributes {
 		this.imageId = imageId;
 	}
 	
+	public void setCircle(Circle circle) {
+		this.circle = circle;
+	}
+	
 	public Bitmap getBitmap() {
 		return bitmap;
 	}
@@ -72,5 +86,9 @@ public class MarkersAttributes {
 	
 	public String getImageId() {
 		return imageId;
+	}
+	
+	public Circle getCircle() {
+		return circle;
 	}
 }
