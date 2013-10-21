@@ -1,4 +1,4 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.mapobjects;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,16 +24,19 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
+import com.facebookhackathon.serverrequests.ApiRequestConstants;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class CameraView {
+	//class for events on the map
 	private static double lat_ne;
 	private static double long_ne;
 	private static double lat_sw;
 	private static double long_sw;
+	//camera thread for spotting user movements
 	private Thread camera;
 	private Context context;
 	private GoogleMap map;
@@ -48,6 +51,7 @@ public class CameraView {
 		setCamera();
 	}
 	
+	//setting the thread
 	private void setCamera(){
 		camera = new Thread(new Runnable() {
 
@@ -117,13 +121,14 @@ public class CameraView {
 										final int magnitude = jObj.getInt("magn");
 										final CircleOptions co = new CircleOptions()
 															.center(ll)
+															.strokeColor(Color.TRANSPARENT)
 															.radius(magnitude * 20);
 										if (magnitude == 3){
-											co.fillColor(Color.argb(0, 180, 20, 0));
+											co.fillColor(Color.argb(80, 255, 0, 0));
 										} else if (magnitude == 2) {
-											co.fillColor(Color.argb(0, 130, 20, 0));
+											co.fillColor(Color.argb(60, 255, 0, 0));
 										} else {
-											co.fillColor(Color.argb(0, 130, 20, 0));
+											co.fillColor(Color.argb(40, 255, 0, 0));
 										}
 										
 										((Activity) context).runOnUiThread( new Runnable() {
@@ -154,6 +159,7 @@ public class CameraView {
 		});
 	}
 	
+	//Getters and Setters
 	public Thread getCamera() {
 		return camera;
 	}

@@ -1,4 +1,4 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.alertdialogs;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -22,11 +22,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class UpdateAlertDialog extends ReportAllertDialog {
+import com.facebookhackathon.mapobjects.Markers;
+import com.facebookhackathon.serverrequests.ApiRequestConstants;
+import com.facebookhackathon.serverrequests.SendImageHttpPut;
+import com.facebookhackathon.trashreport.R;
+
+public class UpdateAlertDialog extends ReportAlertDialog {
 
 	private static boolean theImageIsChanged;
 	private static boolean theMagnitudeIsChanged;

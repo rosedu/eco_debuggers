@@ -1,15 +1,13 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.serverrequests;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -18,18 +16,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.util.Log;
 
-@SuppressWarnings("deprecation")
-public class SendImageHttpPost {
+public class SendImageHttpPut {
 	
-	public void sendPost(String url, Bitmap bitmap, String magnitude, String lat, String lng){
+	@SuppressWarnings("deprecation")
+	public void sendPut(String url, Bitmap bitmap, String imageId, String magnitude){
 		HttpClient httpClient = new DefaultHttpClient();
-		HttpPost postRequest = new HttpPost(url);
+		HttpPut putRequest = new HttpPut(url);
 		MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 		try {
-			reqEntity.addPart("lat", new StringBody(lat));
-			reqEntity.addPart("long", new StringBody(lng));
+			reqEntity.addPart("_id", new StringBody(imageId));
 			reqEntity.addPart("magn", new StringBody(magnitude));
 		} catch (UnsupportedEncodingException e2) {
 			e2.printStackTrace();
@@ -49,9 +45,9 @@ public class SendImageHttpPost {
 				e1.printStackTrace();
 			}
 	    }
-		postRequest.setEntity(reqEntity);
+		putRequest.setEntity(reqEntity);
 		try {
-			HttpResponse response = httpClient.execute(postRequest);
+			HttpResponse response = httpClient.execute(putRequest);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

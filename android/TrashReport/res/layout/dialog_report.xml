@@ -10,7 +10,7 @@
         android:id="@+id/imageview_dialog_report"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:scaleType="center"
+        android:scaleType="fitXY"
         android:src="@drawable/all4"
     />
     

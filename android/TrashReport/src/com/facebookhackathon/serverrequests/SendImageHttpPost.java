@@ -1,4 +1,4 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.serverrequests;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -17,14 +17,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 
-public class SendImageHttpPut {
+@SuppressWarnings("deprecation")
+public class SendImageHttpPost {
 	
-	public void sendPut(String url, Bitmap bitmap, String imageId, String magnitude){
+	public void sendPost(String url, Bitmap bitmap, String magnitude, String lat, String lng){
 		HttpClient httpClient = new DefaultHttpClient();
-		HttpPut putRequest = new HttpPut(url);
+		HttpPost postRequest = new HttpPost(url);
 		MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 		try {
-			reqEntity.addPart("_id", new StringBody(imageId));
+			reqEntity.addPart("lat", new StringBody(lat));
+			reqEntity.addPart("long", new StringBody(lng));
 			reqEntity.addPart("magn", new StringBody(magnitude));
 		} catch (UnsupportedEncodingException e2) {
 			e2.printStackTrace();
@@ -44,9 +46,9 @@ public class SendImageHttpPut {
 				e1.printStackTrace();
 			}
 	    }
-		putRequest.setEntity(reqEntity);
+		postRequest.setEntity(reqEntity);
 		try {
-			HttpResponse response = httpClient.execute(putRequest);
+			HttpResponse response = httpClient.execute(postRequest);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

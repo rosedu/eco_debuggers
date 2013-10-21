@@ -1,4 +1,4 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.alertdialogs;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,11 +12,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class ReportAllertDialog {
+import com.facebookhackathon.gps.MyLocation;
+import com.facebookhackathon.serverrequests.ApiRequestConstants;
+import com.facebookhackathon.serverrequests.SendImageHttpPost;
+import com.facebookhackathon.trashreport.R;
+
+public class ReportAlertDialog {
 	protected AlertDialog alertDialog;
 	protected AlertDialog.Builder builder;
 	protected boolean withPicture;
@@ -28,10 +33,10 @@ public class ReportAllertDialog {
 	protected Bitmap bitmap;
 	protected int seekBarProgress;
 	
-	public ReportAllertDialog() {
+	public ReportAlertDialog() {
 	}
 	
-	public ReportAllertDialog(Context context, boolean withPicture){
+	public ReportAlertDialog(Context context, boolean withPicture){
 		this.withPicture = withPicture;
 		this.context = context;
 		this.builder = new AlertDialog.Builder(this.context);
@@ -155,7 +160,6 @@ public class ReportAllertDialog {
 	}
 	
 	//Getters and Setters
-	
 	public void setContext(Context context) {
 		this.context = context;
 	}
