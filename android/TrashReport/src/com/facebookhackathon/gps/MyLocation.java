@@ -1,4 +1,4 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.gps;
 
 public class MyLocation {
 	public static double myLat;

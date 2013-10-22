@@ -1,4 +1,4 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.gps;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,6 +19,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 
 public class LocationFinder extends Service implements LocationListener{
+	//GPS locater
 	
 	private LocationManager locationManager;
 	private Context context;
@@ -37,6 +38,7 @@ public class LocationFinder extends Service implements LocationListener{
 		setSyncThread();
 	}
 	
+	//display a dialog so the user can activate he's GPS
 	private void showSettingsAlert(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle("GPS settings");
@@ -106,6 +108,7 @@ public class LocationFinder extends Service implements LocationListener{
 		return null;
 	}
 	
+	//thread for checking the first user's position and move the map camera there
 	private void setSyncThread(){
 		syncPosition = new Thread(new Runnable() {
 			

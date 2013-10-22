@@ -1,4 +1,4 @@
-package com.facebookhackathon.trashreport;
+package com.facebookhackathon.mapobjects;
 
 import android.graphics.Bitmap;
 

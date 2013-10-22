@@ -3,7 +3,6 @@ package com.facebookhackathon.trashreport;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.View.MeasureSpec;
 import android.widget.ImageView;
 
 public class ResizableImageView extends ImageView {
